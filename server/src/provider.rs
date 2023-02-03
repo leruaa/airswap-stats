@@ -12,9 +12,11 @@ use ethers::{
 };
 use parking_lot::Mutex;
 
+type Erc20Map = HashMap<Address, Arc<Erc20Contract<EthersProvider<Http>>>>;
+
 pub struct Provider {
     inner: Arc<EthersProvider<Http>>,
-    erc20_contracts: Arc<Mutex<HashMap<Address, Arc<Erc20Contract<EthersProvider<Http>>>>>>,
+    erc20_contracts: Arc<Mutex<Erc20Map>>,
 }
 
 impl Provider {
