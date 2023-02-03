@@ -1,13 +1,14 @@
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 use axum::{
     extract::{Query, State},
     Json,
 };
+use ethers::types::Chain;
 use futures::{future::join_all, FutureExt};
 use serde::{Deserialize, Serialize};
 
-use crate::{pool::Pool, prices_feed::PricesFeed, utils::uint_to_float};
+use crate::{pool::Pool, prices_feed::PricesFeed, provider::Provider, utils::uint_to_float};
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct QueryParams {
@@ -15,20 +16,24 @@ pub struct QueryParams {
 }
 
 pub async fn assets(
-    State(pools): State<Arc<Vec<Pool>>>,
+    State((providers, pools)): State<(Arc<HashMap<Chain, Provider>>, Arc<Vec<Pool>>)>,
     Query(params): Query<QueryParams>,
 ) -> Json<Vec<PoolHoldings>> {
     let prices_feed = PricesFeed::new();
-    let assets = pools.iter().flat_map(|p| p.asset_ids()).collect::<Vec<_>>();
+    let assets = pools
+        .iter()
+        .flat_map(|p| p.assets_ids())
+        .collect::<Vec<_>>();
 
     let prices = prices_feed.get_prices(&assets).await;
 
     let mut assets_balances = join_all(
         pools
             .iter()
-            .map(|p| {
-                p.balance_of()
-                    .map(|a| a.into_iter().map(|a| (p.chain, a)).collect::<Vec<_>>())
+            .filter_map(|p| providers.get(&p.chain).map(|provider| (p, provider)))
+            .map(|(pool, provider)| {
+                pool.balance_of(provider)
+                    .map(|a| a.into_iter().map(|a| (pool.chain, a)).collect::<Vec<_>>())
             })
             .collect::<Vec<_>>(),
     )
