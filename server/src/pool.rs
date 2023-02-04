@@ -40,7 +40,7 @@ impl Pool {
                         a.clone(),
                         self.get_to_distribute_balance(a, provider).await,
                         self.get_to_withdraw_balance(a, provider).await,
-                        a.balance_of(self.address, provider).await,
+                        a.balance_of(self.address, provider).await.unwrap(),
                     )
                 })
             })
@@ -51,13 +51,21 @@ impl Pool {
 
     async fn get_to_distribute_balance(&self, asset: &Asset, provider: &Provider) -> Option<U256> {
         match &self.split {
-            Some(split) => Some(asset.balance_of(split.source, provider).await),
+            Some(split) => asset.balance_of(split.account, provider).await,
             None => None,
         }
     }
 
-    async fn get_to_withdraw_balance(&self, _asset: &Asset, _provider: &Provider) -> Option<U256> {
-        None
+    async fn get_to_withdraw_balance(&self, asset: &Asset, provider: &Provider) -> Option<U256> {
+        match &self.split {
+            Some(split) => provider
+                .get_split(split.main)
+                .get_erc20_balance(split.account, asset.address)
+                .call()
+                .await
+                .ok(),
+            None => None,
+        }
     }
 }
 

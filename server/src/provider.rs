@@ -1,7 +1,7 @@
 use std::{collections::HashMap, sync::Arc};
 
 use crate::{
-    abi::Erc20Contract,
+    abi::{Erc20Contract, SplitContract},
     asset::Asset,
     config::{Config, ProviderConfig},
 };
@@ -13,17 +13,21 @@ use ethers::{
 use parking_lot::Mutex;
 
 type Erc20Map = HashMap<Address, Arc<Erc20Contract<EthersProvider<Http>>>>;
+type SplitOption = Option<Arc<SplitContract<EthersProvider<Http>>>>;
 
 pub struct Provider {
     inner: Arc<EthersProvider<Http>>,
     erc20_contracts: Arc<Mutex<Erc20Map>>,
+    split_contract: Arc<Mutex<SplitOption>>,
 }
 
 impl Provider {
     pub fn new(inner: EthersProvider<Http>) -> Self {
+        let inner = Arc::new(inner);
         Self {
-            inner: Arc::new(inner),
+            inner,
             erc20_contracts: Arc::new(Mutex::new(HashMap::new())),
+            split_contract: Arc::new(Mutex::new(None)),
         }
     }
 
@@ -32,6 +36,13 @@ impl Provider {
             .lock()
             .entry(asset.address)
             .or_insert_with(|| Arc::new(Erc20Contract::new(asset.address, self.inner.clone())))
+            .clone()
+    }
+
+    pub fn get_split(&self, address: Address) -> Arc<SplitContract<EthersProvider<Http>>> {
+        self.split_contract
+            .lock()
+            .get_or_insert_with(|| Arc::new(SplitContract::new(address, self.inner.clone())))
             .clone()
     }
 }

@@ -25,7 +25,6 @@ pub struct PoolConfig {
 #[derive(Debug, Deserialize)]
 pub struct SplitConfig {
     pub chain: Chain,
-    pub source: Address,
     pub account: Address,
     pub main: Address,
 }

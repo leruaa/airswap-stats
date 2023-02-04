@@ -13,13 +13,13 @@ pub struct Asset {
 }
 
 impl Asset {
-    pub async fn balance_of(&self, address: Address, provider: &Provider) -> U256 {
+    pub async fn balance_of(&self, address: Address, provider: &Provider) -> Option<U256> {
         provider
             .get_erc20(self)
             .balance_of(address)
             .call()
             .await
-            .unwrap()
+            .ok()
     }
 }
 
