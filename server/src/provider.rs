@@ -3,7 +3,6 @@ use std::{collections::HashMap, sync::Arc};
 use crate::{
     abi::{Erc20Contract, SplitContract},
     asset::Asset,
-    config::{Config, ProviderConfig},
 };
 use ethers::{
     abi::Address,
@@ -11,6 +10,7 @@ use ethers::{
     types::Chain,
 };
 use parking_lot::Mutex;
+use shuttle_secrets::SecretStore;
 
 type Erc20Map = HashMap<Address, Arc<Erc20Contract<EthersProvider<Http>>>>;
 type SplitOption = Option<Arc<SplitContract<EthersProvider<Http>>>>;
@@ -47,25 +47,45 @@ impl Provider {
     }
 }
 
-impl TryFrom<&ProviderConfig> for Provider {
-    type Error = String;
+pub struct Providers(HashMap<Chain, Provider>);
 
-    fn try_from(value: &ProviderConfig) -> Result<Self, Self::Error> {
-        let inner = EthersProvider::try_from(value.url.clone()).map_err(|err| err.to_string())?;
-        Ok(Provider::new(inner))
+impl Providers {
+    pub fn get(&self, chain: &Chain) -> Option<&Provider> {
+        self.0.get(chain)
     }
 }
 
-impl TryFrom<&Config> for HashMap<Chain, Provider> {
+impl TryFrom<String> for Provider {
     type Error = String;
 
-    fn try_from(config: &Config) -> Result<Self, Self::Error> {
-        config
-            .providers
-            .iter()
-            .map(|provider_config| {
-                Provider::try_from(provider_config).map(|p| (provider_config.chain, p))
-            })
-            .collect()
+    fn try_from(url: String) -> Result<Self, Self::Error> {
+        EthersProvider::try_from(url)
+            .map(Provider::new)
+            .map_err(|err| err.to_string())
+    }
+}
+
+impl TryFrom<&SecretStore> for Providers {
+    type Error = String;
+
+    fn try_from(store: &SecretStore) -> Result<Self, Self::Error> {
+        let providers = HashMap::from([
+            (
+                Chain::Mainnet,
+                store
+                    .get("ETH_PROVIDER")
+                    .ok_or_else(|| String::from("ETH_PROVIDER secret not found"))?
+                    .try_into()?,
+            ),
+            (
+                Chain::BinanceSmartChain,
+                store
+                    .get("BSC_PROVIDER")
+                    .ok_or_else(|| String::from("BSC_PROVIDER secret not found"))?
+                    .try_into()?,
+            ),
+        ]);
+
+        Ok(Providers(providers))
     }
 }

@@ -1,0 +1,81 @@
+{
+    "pools": [
+        {
+            "chain": "mainnet",
+            "address": "0xe2E7AE67E7ee6d4D90dfef945aB6dE6A14dB4c17",
+            "split": {
+                "chain": "mainnet",
+                "account": "0xaD30f7EEBD9Bd5150a256F47DA41d4403033CdF0",
+                "main": "0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE"
+            },
+            "assets": [
+                {
+                    "id": "weth",
+                    "ticker": "WETH",
+                    "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+                    "decimals": 18
+                },
+                {
+                    "id": "usd-coin",
+                    "ticker": "USDC",
+                    "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+                    "decimals": 6
+                },
+                {
+                    "id": "tether",
+                    "ticker": "USDT",
+                    "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+                    "decimals": 6
+                },
+                {
+                    "id": "wrapped-bitcoin",
+                    "ticker": "WBTC",
+                    "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+                    "decimals": 8
+                },
+                {
+                    "id": "apecoin",
+                    "ticker": "APE",
+                    "address": "0x4d224452801ACEd8B2F0aebE155379bb5D594381",
+                    "decimals": 18
+                }
+            ]
+        },
+        {
+            "chain": "binance_smart_chain",
+            "address": "0x16B57a5958271C479f64BC5F830DfC4f30ba2235",
+            "assets": [
+                {
+                    "id": "wbnb",
+                    "ticker": "WBNB",
+                    "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+                    "decimals": 18
+                },
+                {
+                    "id": "ethereum",
+                    "ticker": "ETH",
+                    "address": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+                    "decimals": 18
+                },
+                {
+                    "id": "binance-usd",
+                    "ticker": "BUSD",
+                    "address": "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
+                    "decimals": 18
+                },
+                {
+                    "id": "usd-coin",
+                    "ticker": "USDC",
+                    "address": "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+                    "decimals": 18
+                },
+                {
+                    "id": "tether",
+                    "ticker": "USDT",
+                    "address": "0x55d398326f99059fF775485246999027B3197955",
+                    "decimals": 18
+                }
+            ]
+        }
+    ]
+}

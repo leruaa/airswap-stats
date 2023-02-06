@@ -1,16 +1,15 @@
-use std::{collections::HashMap, sync::Arc};
+use std::sync::Arc;
 
 use axum::{
     extract::{Query, State},
     Json,
 };
-use ethers::types::Chain;
 use futures::{future::join_all, FutureExt};
 use serde::{Deserialize, Serialize};
 
-use crate::{pool::Pool, prices_feed::PricesFeed, provider::Provider, utils::uint_to_float};
+use crate::{pool::Pool, prices_feed::PricesFeed, provider::Providers, utils::uint_to_float};
 
-type AssetsState = (Arc<HashMap<Chain, Provider>>, Arc<Vec<Pool>>);
+type AssetsState = (Arc<Providers>, Arc<Vec<Pool>>);
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct QueryParams {

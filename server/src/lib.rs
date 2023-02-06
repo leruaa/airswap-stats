@@ -8,21 +8,21 @@ mod services;
 mod split;
 mod utils;
 
-use std::{collections::HashMap, sync::Arc};
+use std::sync::Arc;
 
 use axum::{routing::get, Router};
 use config::Config;
-use ethers::types::Chain;
 use pool::Pool;
-use provider::Provider;
+use provider::Providers;
+use shuttle_secrets::{SecretStore, Secrets};
 use sync_wrapper::SyncWrapper;
 
 #[shuttle_service::main]
-async fn axum() -> shuttle_service::ShuttleAxum {
+async fn axum(#[Secrets] secret_store: SecretStore) -> shuttle_service::ShuttleAxum {
     let config = Config::get();
 
     let pools = config.pools.iter().map(Pool::from).collect::<Vec<_>>();
-    let providers = <HashMap<Chain, Provider> as TryFrom<_>>::try_from(&config).unwrap();
+    let providers = Providers::try_from(&secret_store).unwrap();
 
     let router = Router::new()
         .route("/pools/assets", get(services::pools::assets))

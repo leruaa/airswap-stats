@@ -4,7 +4,6 @@ use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
-    pub providers: Vec<ProviderConfig>,
     pub pools: Vec<PoolConfig>,
 }
 
@@ -27,10 +26,4 @@ pub struct SplitConfig {
     pub chain: Chain,
     pub account: Address,
     pub main: Address,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct ProviderConfig {
-    pub chain: Chain,
-    pub url: String,
 }
