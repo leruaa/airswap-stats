@@ -36,14 +36,10 @@ impl Pool {
             .iter()
             .map(|a| -> BoxedBalanceOfFuture {
                 Box::pin(async {
-                    let to_distribute = self.get_to_distribute_balance(a, provider).await;
-                    let splits_balance = self.get_0xsplits_balance(a, provider).await;
                     AssetWithBalances::new(
                         a.clone(),
-                        to_distribute,
-                        splits_balance
-                            .unwrap_or_default()
-                            .checked_sub(to_distribute.unwrap_or_default()),
+                        self.get_to_distribute_balance(a, provider).await,
+                        self.get_to_withdraw_balance(a, provider).await,
                         a.balance_of(self.address, provider).await.unwrap(),
                     )
                 })
@@ -55,16 +51,21 @@ impl Pool {
 
     async fn get_to_distribute_balance(&self, asset: &Asset, provider: &Provider) -> Option<U256> {
         match &self.split {
-            Some(split) => asset.balance_of(split.account, provider).await,
+            Some(split) => provider
+                .get_split(split.main)
+                .get_erc20_balance(split.account, asset.address)
+                .call()
+                .await
+                .ok(),
             None => None,
         }
     }
 
-    async fn get_0xsplits_balance(&self, asset: &Asset, provider: &Provider) -> Option<U256> {
+    async fn get_to_withdraw_balance(&self, asset: &Asset, provider: &Provider) -> Option<U256> {
         match &self.split {
             Some(split) => provider
                 .get_split(split.main)
-                .get_erc20_balance(split.account, asset.address)
+                .get_erc20_balance(self.address, asset.address)
                 .call()
                 .await
                 .ok(),
