@@ -96,12 +96,17 @@ impl AssetWithBalances {
         )
     }
 
+    pub fn total(&self) -> f64 {
+        utils::uint_to_float(self.1.to_distribute.unwrap_or_default(), self.0.decimals)
+            + utils::uint_to_float(self.1.to_withdraw.unwrap_or_default(), self.0.decimals)
+            + utils::uint_to_float(self.1.to_claim, self.0.decimals)
+    }
+
     pub fn get_reward(&self, points: Option<f64>, price: f64) -> Option<f64> {
         match points {
             Some(points) => {
                 let share = utils::get_share(points);
-                let float_balance = utils::uint_to_float(self.1.to_claim, self.0.decimals);
-                Some(utils::get_reward(float_balance, share) * price)
+                Some(utils::get_reward(self.total(), share) * price)
             }
             None => None,
         }
