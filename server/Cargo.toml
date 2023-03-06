@@ -7,8 +7,8 @@ publish = false
 [lib]
 
 [dependencies]
-shuttle-service = { version = "0.10", features = ["web-axum"] }
-shuttle-secrets = "0.10"
+shuttle-service = { version = "0.11", features = ["web-axum"] }
+shuttle-secrets = "0.11"
 futures = "0.3"
 axum = "0.6.2"
 sync_wrapper = "0.1.1"
