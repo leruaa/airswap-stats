@@ -15,10 +15,9 @@ use config::Config;
 use pool::Pool;
 use provider::Providers;
 use shuttle_secrets::{SecretStore, Secrets};
-use sync_wrapper::SyncWrapper;
 
-#[shuttle_service::main]
-async fn axum(#[Secrets] secret_store: SecretStore) -> shuttle_service::ShuttleAxum {
+#[shuttle_runtime::main]
+async fn axum(#[Secrets] secret_store: SecretStore) -> shuttle_axum::ShuttleAxum {
     let config = Config::get();
 
     let pools = config.pools.iter().map(Pool::from).collect::<Vec<_>>();
@@ -29,7 +28,5 @@ async fn axum(#[Secrets] secret_store: SecretStore) -> shuttle_service::ShuttleA
         .route("/staking/share", get(services::staking::share))
         .with_state((Arc::new(providers), Arc::new(pools)));
 
-    let sync_wrapper = SyncWrapper::new(router);
-
-    Ok(sync_wrapper)
+    Ok(router.into())
 }
