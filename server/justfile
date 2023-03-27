@@ -1,0 +1,10 @@
+run:
+  cargo shuttle run
+
+deploy:
+  cargo shuttle deploy --allow-dirty
+
+update:
+  cargo shuttle project rm
+  cargo shuttle project new
+  cargo shuttle deploy --allow-dirty
