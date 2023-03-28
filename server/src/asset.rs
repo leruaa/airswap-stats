@@ -28,3 +28,11 @@ impl Hash for Asset {
         self.id.hash(state);
     }
 }
+
+impl PartialEq for Asset {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
+impl Eq for Asset {}

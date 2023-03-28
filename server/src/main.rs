@@ -2,7 +2,7 @@ mod abi;
 mod asset;
 mod config;
 mod pool;
-mod prices_feed;
+mod prices;
 mod provider;
 mod services;
 mod split;

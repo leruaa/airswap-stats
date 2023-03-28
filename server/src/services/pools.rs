@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{collections::HashSet, sync::Arc};
 
 use axum::{
     extract::{Query, State},
@@ -7,7 +7,12 @@ use axum::{
 use futures::{future::join_all, FutureExt};
 use serde::{Deserialize, Serialize};
 
-use crate::{pool::Pool, prices_feed::PricesFeed, provider::Providers, utils::uint_to_float};
+use crate::{
+    pool::Pool,
+    prices::{CoinGeckoPriceFeed, PriceFeed},
+    provider::Providers,
+    utils::uint_to_float,
+};
 
 type AssetsState = (Arc<Providers>, Arc<Vec<Pool>>);
 
@@ -19,14 +24,14 @@ pub struct QueryParams {
 pub async fn assets(
     State((providers, pools)): State<AssetsState>,
     Query(params): Query<QueryParams>,
-) -> Json<Vec<PoolHoldings>> {
-    let prices_feed = PricesFeed::new();
+) -> Result<Json<Vec<PoolHoldings>>, String> {
+    let prices_feed = CoinGeckoPriceFeed::new();
     let assets = pools
         .iter()
-        .flat_map(|p| p.assets_ids())
-        .collect::<Vec<_>>();
+        .flat_map(|p| p.assets().cloned())
+        .collect::<HashSet<_>>();
 
-    let prices = prices_feed.get_prices(&assets).await;
+    let prices = prices_feed.get_prices(assets).await;
 
     let mut assets_balances = join_all(
         pools
@@ -41,7 +46,11 @@ pub async fn assets(
     .await
     .iter()
     .flatten()
-    .filter_map(|(chain, asset)| prices.get(&asset.0.id).map(|p| (chain, asset, p)))
+    .filter_map(|(chain, asset)| {
+        prices
+            .get(&asset.0.id)
+            .map(|p| (chain, asset, p.as_ref().unwrap()))
+    })
     .map(|(chain, asset, price)| {
         PoolHoldings::new(
             chain.to_string(),
@@ -64,7 +73,7 @@ pub async fn assets(
     assets_balances.sort();
     assets_balances.reverse();
 
-    Json(assets_balances)
+    Ok(Json(assets_balances))
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

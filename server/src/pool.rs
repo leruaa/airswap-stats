@@ -26,8 +26,8 @@ impl Pool {
         }
     }
 
-    pub fn assets_ids(&self) -> Vec<String> {
-        self.assets.iter().map(|a| a.id.clone()).collect()
+    pub fn assets(&self) -> impl Iterator<Item = &Asset> {
+        self.assets.iter()
     }
 
     pub async fn get_balances(&self, provider: &Provider) -> Vec<AssetWithBalances> {
