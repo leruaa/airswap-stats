@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     pool::Pool,
-    prices::{CoinGeckoPriceFeed, PriceFeed},
+    prices::{BinancePriceFeed, PriceFeed},
     provider::Providers,
     utils::uint_to_float,
 };
@@ -25,7 +25,7 @@ pub async fn assets(
     State((providers, pools)): State<AssetsState>,
     Query(params): Query<QueryParams>,
 ) -> Result<Json<Vec<PoolHoldings>>, String> {
-    let prices_feed = CoinGeckoPriceFeed::new();
+    let prices_feed = BinancePriceFeed::new();
     let assets = pools
         .iter()
         .flat_map(|p| p.assets().cloned())
@@ -49,7 +49,7 @@ pub async fn assets(
     .filter_map(|(chain, asset)| {
         prices
             .get(&asset.0.id)
-            .map(|p| (chain, asset, p.as_ref().unwrap()))
+            .map(|p| (chain, asset, p.as_ref().unwrap_or(&0_f64)))
     })
     .map(|(chain, asset, price)| {
         PoolHoldings::new(

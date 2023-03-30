@@ -11,6 +11,7 @@ use super::price_feed::PriceFeed;
 
 pub struct BinancePriceFeed {
     client: Client,
+    ticker_to_symbol: HashMap<String, String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -22,6 +23,12 @@ impl BinancePriceFeed {
     pub fn new() -> Self {
         Self {
             client: Client::new(),
+            ticker_to_symbol: HashMap::from([
+                ("WBTC".to_string(), "BTCUSDT".to_string()),
+                ("WETH".to_string(), "ETHUSDT".to_string()),
+                ("WBNB".to_string(), "BNBUSDT".to_string()),
+                ("USDT".to_string(), "USDCUSDT".to_string()),
+            ]),
         }
     }
 
@@ -29,15 +36,15 @@ impl BinancePriceFeed {
         let request_futures = assets
             .into_iter()
             .map(|a| {
-                if a.ticker == "USDC" {
-                    (a.id, String::from("USDCUSDT"))
-                } else {
-                    (a.id.clone(), format!("{}USDC", a.ticker))
-                }
+                (
+                    a.id,
+                    self.ticker_to_symbol
+                        .get(&a.ticker)
+                        .cloned()
+                        .unwrap_or_else(|| format!("{}USDT", a.ticker)),
+                )
             })
-            .into_iter()
             .map(|(id, symbol)| {
-                println!("{}", symbol);
                 self.client
                     .get("https://data.binance.com/api/v3/avgPrice")
                     .query(&[("symbol", symbol.as_str())])
