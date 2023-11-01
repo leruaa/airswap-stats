@@ -5,6 +5,5 @@ deploy:
   cargo shuttle deploy --allow-dirty
 
 update:
-  cargo shuttle project rm
-  cargo shuttle project new
+  cargo shuttle project restart
   cargo shuttle deploy --allow-dirty
