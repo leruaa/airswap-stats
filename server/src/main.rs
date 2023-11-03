@@ -2,7 +2,6 @@ mod abi;
 mod asset;
 mod config;
 mod pool;
-mod prices;
 mod provider;
 mod services;
 mod split;

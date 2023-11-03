@@ -5,6 +5,9 @@ edition = "2021"
 publish = false
 
 [dependencies]
+price-feeds = { git = "https://github.com/leruaa/price-feeds-rs", features = [
+    "defillama",
+] }
 shuttle-axum = { version = "0.30" }
 shuttle-runtime = { version = "0.30" }
 shuttle-secrets = "0.30"

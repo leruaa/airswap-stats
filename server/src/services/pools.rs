@@ -5,14 +5,10 @@ use axum::{
     Json,
 };
 use futures::{future::join_all, FutureExt};
+use price_feeds::{feeds::Defillama, PriceFeed};
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    pool::Pool,
-    prices::{BinancePriceFeed, PriceFeed},
-    provider::Providers,
-    utils::uint_to_float,
-};
+use crate::{pool::Pool, provider::Providers, utils::uint_to_float};
 
 type AssetsState = (Arc<Providers>, Arc<Vec<Pool>>);
 
@@ -25,13 +21,19 @@ pub async fn assets(
     State((providers, pools)): State<AssetsState>,
     Query(params): Query<QueryParams>,
 ) -> Result<Json<Vec<PoolHoldings>>, String> {
-    let prices_feed = BinancePriceFeed::new();
+    let prices_feed = Defillama::new();
     let assets = pools
         .iter()
-        .flat_map(|p| p.assets().cloned())
+        .flat_map(|p| p.assets())
+        .map(|a| a.address)
         .collect::<HashSet<_>>();
 
-    let prices = prices_feed.get_prices(assets).await;
+    let assets = assets.into_iter().collect::<Vec<_>>();
+
+    let prices = prices_feed
+        .usd_prices(assets.as_slice())
+        .await
+        .map_err(|err| err.to_string())?;
 
     let mut assets_balances = join_all(
         pools
@@ -48,14 +50,14 @@ pub async fn assets(
     .flatten()
     .filter_map(|(chain, asset)| {
         prices
-            .get(&asset.0.id)
-            .map(|p| (chain, asset, p.as_ref().unwrap_or(&0_f64)))
+            .get(&asset.0.address)
+            .map(|p| (chain, asset, p.to_f64().value()))
     })
     .map(|(chain, asset, price)| {
         PoolHoldings::new(
             chain.to_string(),
             asset.0.ticker.clone(),
-            *price,
+            price,
             asset
                 .1
                 .to_distribute
@@ -65,7 +67,7 @@ pub async fn assets(
                 .to_withdraw
                 .map(|v| uint_to_float(v, asset.0.decimals)),
             uint_to_float(asset.1.to_claim, asset.0.decimals),
-            asset.get_reward(params.points, *price),
+            asset.get_reward(params.points, price),
         )
     })
     .collect::<Vec<_>>();
