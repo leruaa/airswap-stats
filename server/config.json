@@ -2,7 +2,7 @@
     "pools": [
         {
             "chain": "mainnet",
-            "address": "0xe2E7AE67E7ee6d4D90dfef945aB6dE6A14dB4c17",
+            "address": "0xbbcec987E4C189FCbAB0a2534c77b3ba89229F11",
             "split": {
                 "chain": "mainnet",
                 "account": "0xaD30f7EEBD9Bd5150a256F47DA41d4403033CdF0",
@@ -49,7 +49,7 @@
         },
         {
             "chain": "binance_smart_chain",
-            "address": "0x16B57a5958271C479f64BC5F830DfC4f30ba2235",
+            "address": "0xbbcec987E4C189FCbAB0a2534c77b3ba89229F11",
             "assets": [
                 {
                     "id": "wbnb",
