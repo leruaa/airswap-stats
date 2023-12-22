@@ -146,7 +146,7 @@ impl Ord for PoolHoldings {
 
 impl PartialOrd for PoolHoldings {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.total.partial_cmp(&other.total)
+        Some(self.cmp(other))
     }
 }
 
