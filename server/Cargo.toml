@@ -8,12 +8,15 @@ publish = false
 price-feeds = { git = "https://github.com/leruaa/price-feeds-rs", features = [
     "defillama",
 ] }
-shuttle-axum = { version = "0.30" }
-shuttle-runtime = { version = "0.30" }
-shuttle-secrets = "0.30"
+shuttle-axum = { version = "0.35", default-features = false, features = [
+    "axum-0-7",
+] }
+shuttle-runtime = { version = "0.35", default-features = false }
+shuttle-secrets = "0.35"
 "async-trait" = "0.1"
 futures = "0.3"
-axum = "0.6.2"
+axum = "0.7"
+tower-http = { version = "0.5", features = ["trace"] }
 sync_wrapper = "0.1.1"
 ethers = { version = "2", features = ["abigen"] }
 reqwest = { version = "0.11.13", features = ["json"] }
@@ -22,3 +25,5 @@ serde = "1.0"
 serde_json = "1.0"
 serde_qs = "0.11"
 parking_lot = "0.12"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
